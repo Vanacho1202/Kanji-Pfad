@@ -1,0 +1,16 @@
+{
+  "name": "kanji-pfad",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kanji-Pfad: JLPT-N5-Kanji-Trainer mit Online-Speicherung",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  }
+}

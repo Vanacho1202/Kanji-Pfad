@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kanji-Pfad">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="icon" href="/icon-192.png">
+<title>Kanji-Pfad</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap">
+<style>
+/* Layout: eine schmale Lernspalte, Karten nur für die aktive Aufgabe, Raster für den Fortschritt */
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f5fb;--card:#fff;--ink:#1d2144;--mute:#5d6189;--k:#4f46e5;--onk:#fff;--ok:#0e9f6e;--onok:#fff;--bad:#e11d48;--line:#e1e3f2;--tk:#e3e1ff;--tg:#d4f3e5;--tm:#fbecc0;--inkm:#7a5a00;--shade:rgba(19,21,42,.45);
+ --f:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13152a;--card:#1d2040;--ink:#eceefc;--mute:#a3a7cf;--k:#8b84ff;--onk:#13152a;--ok:#34d399;--onok:#0b2a20;--bad:#fb7185;--line:#2c3060;--tk:#2c2f66;--tg:#14392f;--tm:#3d3416;--inkm:#f2cf6b;--shade:rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#13152a;--card:#1d2040;--ink:#eceefc;--mute:#a3a7cf;--k:#8b84ff;--onk:#13152a;--ok:#34d399;--onok:#0b2a20;--bad:#fb7185;--line:#2c3060;--tk:#2c2f66;--tg:#14392f;--tm:#3d3416;--inkm:#f2cf6b;--shade:rgba(0,0,0,.6);color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}img{max-width:100%}[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+body::before,body::after{content:"";position:fixed;left:0;right:0;background:var(--bg);pointer-events:none;z-index:10}
+body::before{top:0;height:env(safe-area-inset-top,0px)}
+body::after{bottom:0;height:env(safe-area-inset-bottom,0px)}
+:root{--wa:#d6dbf2;--wb:#eef0fb}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--wa:#161935;--wb:#24294f}}
+:root[data-theme="dark"]{--wa:#161935;--wb:#24294f}
+@media (min-width:560px){
+ html{background-color:var(--wa);background-size:100px 50px;background-image:radial-gradient(circle at 100% 150%,var(--wa) 24%,var(--wb) 24%,var(--wb) 28%,var(--wa) 28%,var(--wa) 36%,var(--wb) 36%,var(--wb) 40%,transparent 40%,transparent),radial-gradient(circle at 0 150%,var(--wa) 24%,var(--wb) 24%,var(--wb) 28%,var(--wa) 28%,var(--wa) 36%,var(--wb) 36%,var(--wb) 40%,transparent 40%,transparent),radial-gradient(circle at 50% 100%,var(--wb) 10%,var(--wa) 10%,var(--wa) 23%,var(--wb) 23%,var(--wb) 30%,var(--wa) 30%,var(--wa) 43%,var(--wb) 43%,var(--wb) 50%,var(--wa) 50%,var(--wa) 63%,var(--wb) 63%,var(--wb) 71%,transparent 71%,transparent),radial-gradient(circle at 100% 50%,var(--wb) 5%,var(--wa) 5%,var(--wa) 15%,var(--wb) 15%,var(--wb) 20%,var(--wa) 20%,var(--wa) 29%,var(--wb) 29%,var(--wb) 34%,var(--wa) 34%,var(--wa) 44%,var(--wb) 44%,var(--wb) 49%,transparent 49%,transparent),radial-gradient(circle at 0 50%,var(--wb) 5%,var(--wa) 5%,var(--wa) 15%,var(--wb) 15%,var(--wb) 20%,var(--wa) 20%,var(--wa) 29%,var(--wb) 29%,var(--wb) 34%,var(--wa) 34%,var(--wa) 44%,var(--wb) 44%,var(--wb) 49%,transparent 49%,transparent)}
+ html body{background:transparent}
+ body::before,body::after{display:none}
+ body>main{max-width:560px;margin:32px auto;padding:28px 32px 40px;background:var(--bg);border:1px solid var(--line);border-radius:28px;box-shadow:0 24px 60px -24px var(--shade)}
+}
+.spk{flex:0 0 auto;padding:6px 8px;border-radius:10px;background:var(--line);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;line-height:0}
+[data-say]{cursor:pointer}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:480px;margin:0 auto;padding-block:20px 40px;display:flex;flex-direction:column;gap:16px}
+h1{font-size:2rem;font-weight:900;margin:0;line-height:1.2;text-wrap:balance}
+h2{margin:0;font-size:1.15rem;text-wrap:balance}
+p{margin:0}
+.sub{color:var(--mute)}
+.tiny{font-size:.85rem;color:var(--mute)}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}
+.bar{height:8px;background:var(--line);border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.bar.thin{height:5px}.bar.thin i{background:var(--k)}
+.row{display:flex;gap:12px}
+button{font:inherit;border:0;border-radius:16px;cursor:pointer;padding:14px 18px;font-weight:700;color:inherit}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--k);outline-offset:2px}
+.big{flex:1;background:var(--k);color:var(--onk);display:flex;flex-direction:column;align-items:center;padding:18px 10px;min-width:0}
+.big b{font-size:2.2rem;line-height:1.1;font-variant-numeric:tabular-nums}.big.alt{background:var(--ok);color:var(--onok)}
+.big1{flex:2;background:var(--k);color:var(--onk)}
+.ghost{flex:1;background:var(--line);color:var(--ink)}
+.sm{flex:0 0 auto;padding:8px 14px;font-size:.9rem;border-radius:12px}
+.w{width:100%}
+.danger{color:var(--bad)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stats div{display:flex;flex-direction:column;align-items:center;text-align:center;padding:10px 4px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.stats b{font-size:1.5rem;line-height:1.2;font-variant-numeric:tabular-nums}.stats span{font-size:.78rem;color:var(--mute)}
+.sync{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--mute)}
+.sync::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--mute);flex:0 0 auto}
+.sync.cloud::before{background:var(--ok)}
+.code{font-size:1.6rem;font-weight:900;letter-spacing:.08em;margin:0;font-variant-numeric:tabular-nums;color:var(--k);user-select:all}.sync.error::before{background:var(--bad)}.sync.loading::before{background:var(--k)}
+.banner{background:var(--tg);border-radius:16px;padding:12px 16px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.grid.k5{grid-template-columns:repeat(5,1fr);gap:8px}
+.t{aspect-ratio:1;max-width:100%;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--tk);padding:0;font-weight:400;min-width:0}
+.t span{font-size:1.7rem;font-weight:700;line-height:1.2}.t small{font-size:.7rem;color:var(--mute);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+.grid.k5 .t span{font-size:1.4rem}
+.t.sx{background:var(--line);color:var(--mute)}.t.sg{background:var(--tg)}.t.s8{background:var(--tm)}.t.s8 small{color:var(--inkm)}
+.t.blank{background:transparent}
+button.t:disabled{opacity:1;cursor:default}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--mute)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-1px;margin-right:5px}
+.lv{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:8px}
+.card{background:var(--card);border-radius:24px;padding:24px;text-align:center;border:2px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.card.ok{border-color:var(--ok)}.card.bad{border-color:var(--bad)}
+.kanji{font-size:6rem;font-weight:900;line-height:1.1;color:var(--k)}
+.tag{align-self:center;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 12px;border-radius:20px;background:var(--tk)}
+.tag.r{background:var(--tg)}
+.hint{color:var(--mute);text-align:left}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;text-align:left}.dl dt{color:var(--mute)}.dl dd{margin:0;min-width:0}
+input,textarea{width:100%;font:inherit;font-size:1.2rem;padding:12px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+input{text-align:center}
+textarea{font-size:1rem;font-family:ui-monospace,Menlo,Consolas,monospace;resize:vertical;word-break:break-all}
+#f{min-height:1.6em;font-weight:700}.card.ok #f{color:var(--ok)}.card.bad #f{color:var(--bad)}
+.qhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.panel{display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:20px;background:var(--card);border:1px solid var(--line)}
+.ov[hidden]{display:none}
+.ov{position:fixed;inset:0;background:var(--shade);display:flex;align-items:flex-end;justify-content:center;z-index:20;padding:16px max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet{width:100%;max-width:440px;max-height:100%;overflow:auto}
+.rd{display:flex;flex-direction:column;gap:6px;text-align:left}
+.rd h3,.grp h3{margin:8px 0 0;font-size:1rem}
+.rl{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.rl li{display:grid;grid-template-columns:minmax(4.5em,max-content) 1fr auto;gap:2px 12px;align-items:baseline;min-width:0}
+.rl b{font-size:1.1rem;overflow-wrap:anywhere}.rl span{color:var(--mute);font-size:.9rem;min-width:0}
+.grp{display:flex;flex-direction:column;gap:12px;text-align:left}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld label{font-size:.9rem;color:var(--mute);line-height:1.4}.fld label b{color:var(--ink)}
+.rin.ok{border-color:var(--ok)}.rin.bad{border-color:var(--bad)}
+.res{font-size:.9rem;font-weight:700}.res.ok{color:var(--ok)}.res.bad{color:var(--bad)}
+.neon{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:15;pointer-events:none;display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;background:#0b0d1f;color:#9ffcff;border:1px solid #22e5ff;font-weight:700;font-size:.85rem;letter-spacing:.03em;text-shadow:0 0 6px #22e5ff,0 0 14px #22e5ff;box-shadow:0 0 8px #22e5ff,0 0 24px rgba(34,229,255,.45),inset 0 0 10px rgba(34,229,255,.3);opacity:0;transform:translateY(10px);transition:opacity .25s,transform .25s}
+.neon::before{content:"";width:8px;height:8px;border-radius:50%;background:#9ffcff;box-shadow:0 0 6px #22e5ff,0 0 12px #22e5ff}
+.neon.on{opacity:1;transform:none;animation:flick .7s}
+.neon.cloud{color:#ffb3f6;border-color:#ff3df2;text-shadow:0 0 6px #ff3df2,0 0 14px #ff3df2;box-shadow:0 0 8px #ff3df2,0 0 24px rgba(255,61,242,.45),inset 0 0 10px rgba(255,61,242,.3)}
+.neon.cloud::before{background:#ffb3f6;box-shadow:0 0 6px #ff3df2,0 0 12px #ff3df2}
+@keyframes flick{0%{opacity:.15}10%{opacity:1}18%{opacity:.35}26%,100%{opacity:1}}
+.mean{font-size:2.2rem;font-weight:900;line-height:1.2;margin:0;padding:28px 0;color:var(--k);text-wrap:balance;overflow-wrap:anywhere}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{font-size:2.8rem;font-weight:700;line-height:1.2;padding:14px 0;border-radius:18px;background:var(--tk);border:2px solid transparent}
+.opt:disabled{opacity:1;cursor:default}.opt.ok{border-color:var(--ok);background:var(--tg)}.opt.bad{border-color:var(--bad)}
+.resume{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:18px;background:#0b0d1f;border:1px solid #ff3df2;box-shadow:0 0 8px #ff3df2,0 0 22px rgba(255,61,242,.4),inset 0 0 10px rgba(255,61,242,.25)}
+.resume>div{flex:1 1 140px;min-width:0;display:flex;flex-direction:column}
+.resume b{font-size:1.05rem;color:#ffb3f6;text-shadow:0 0 6px #ff3df2,0 0 14px #ff3df2}
+.resume span{font-size:.85rem;color:#9ffcff}
+.resume button{padding:10px 16px;border-radius:12px}
+.resume .rsb{background:#22e5ff;color:#06121f;box-shadow:0 0 10px #22e5ff}
+.resume .ghost{flex:0 0 auto;background:#1b1f45;color:#eceefc}
+@keyframes nope{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:nope .25s}
+@media (min-width:600px){.ov{align-items:center}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head><body>
+
+<main id="app"></main>
+<div id="saved" class="neon" role="status" aria-live="polite"></div>
+<div class="ov" id="ov" hidden><div class="sheet" id="sheet"></div></div>
+
+<script>
+/* ---------- Kanji-Daten ---------- */
+/* Lesungen je Kanji: [Art (o = Onyomi, k = Kunyomi), erlaubte Formen (erste wird angezeigt), Verwendung] */
+const RD={
+'一':[['o','いち','bei Zahlen und in Zusammensetzungen, z. B. 一月 (Januar), 一番 (Nummer eins)'],['o','いつ','in festen Wörtern, z. B. 統一 (Vereinigung), 唯一 (einzig)'],['k','ひとつ','beim Zählen von Dingen: 一つ (ein Stück)'],['k','ひと','vor einem anderen Wort, z. B. 一人 (eine Person)']],
+'二':[['o','に','bei Zahlen und in Zusammensetzungen, z. B. 二月 (Februar), 二十 (zwanzig)'],['k','ふたつ','beim Zählen von Dingen: 二つ (zwei Stück)'],['k','ふた','vor einem anderen Wort, z. B. 二人 (zwei Personen)']],
+'三':[['o','さん','bei Zahlen und in Zusammensetzungen, z. B. 三月 (März), 三百 (dreihundert)'],['k','みっつ','beim Zählen von Dingen: 三つ (drei Stück)'],['k','み','bei den Tagen des Monats, z. B. 三日 (dritter Tag)']],
+'人':[['o','じん','als Endung für Herkunft, z. B. 日本人 (Japaner), 外国人 (Ausländer)'],['o','にん','in Wörtern wie 人間 (Mensch), 人気 (Beliebtheit) und beim Zählen: 三人'],['k','ひと','allein stehend: 人 (Mensch, Person)']],
+'大':[['o','だい','meist vorn in Wörtern, z. B. 大学 (Universität), 大事 (wichtig)'],['o','たい','in festen Wörtern, z. B. 大切 (wertvoll), 大変 (schwierig), 大会 (Wettkampf)'],['k','おおきい/おお','als Adjektiv oder vor einem Wort: 大きい (groß), 大勢 (viele Leute)']],
+'小':[['o','しょう','in Wörtern aus mehreren Kanji, z. B. 小学校 (Grundschule), 小説 (Roman)'],['k','ちいさい/ちい','als Adjektiv: 小さい (klein)'],['k','こ','vor einem anderen Wort, z. B. 小鳥 (Singvogel), 小雨 (Nieselregen)'],['k','お','in einzelnen Wörtern, z. B. 小川 (Bach)']],
+'山':[['o','さん','in Wörtern aus mehreren Kanji, z. B. 火山 (Vulkan), 富士山 (Fuji)'],['k','やま','allein stehend: 山 (Berg), 山道 (Bergweg)']],
+'川':[['o','せん','selten, in Wörtern wie 河川 (Flüsse)'],['k','かわ','allein stehend oder vor einem Wort: 川 (Fluss), 川辺 (Flussufer)']],
+'日':[['o','にち','bei Wochentagen und Zeitangaben, z. B. 日曜日 (Sonntag), 毎日 (jeden Tag)'],['o','じつ','in festen Wörtern, z. B. 平日 (Werktag), 休日 (freier Tag)'],['k','ひ','allein stehend: 日 (Tag, Sonne), 日の出 (Sonnenaufgang)'],['k','か','bei den Tagen des Monats ab dem 2., z. B. 二日 (zweiter Tag)'],['k','び','als Endung in Zusammensetzungen, z. B. 誕生日 (Geburtstag)']],
+'月':[['o','げつ','bei Wochentag und Dauer, z. B. 月曜日 (Montag), 先月 (letzter Monat)'],['o','がつ','bei den Monatsnamen, z. B. 一月 (Januar), 三月 (März)'],['k','つき','allein stehend: 月 (Mond, Monat), 月見 (Mondschau)']],
+'火':[['o','か','in Wörtern aus mehreren Kanji, z. B. 火曜日 (Dienstag), 火山 (Vulkan)'],['k','ひ','allein stehend oder vorn: 火 (Feuer), 火花 (Funke)'],['k','び','als Endung in Zusammensetzungen, z. B. 花火 (Feuerwerk)']],
+'水':[['o','すい','in Wörtern aus mehreren Kanji, z. B. 水曜日 (Mittwoch), 水道 (Wasserleitung)'],['k','みず','allein stehend oder vorn: 水 (Wasser), 水色 (Hellblau)']],
+'右':[['o','う','in Verkehrswörtern wie 右折 (rechts abbiegen)'],['o','ゆう','im Wort 左右 (links und rechts)'],['k','みぎ','allein stehend oder vorn: 右 (rechts), 右手 (rechte Hand)']],
+'雨':[['o','う','in Fachwörtern wie 豪雨 (Starkregen)'],['k','あめ','allein stehend oder hinten: 雨 (Regen), 大雨 (Starkregen)'],['k','あま','vor einem anderen Wort, z. B. 雨戸 (Regenladen), 雨傘 (Regenschirm)']],
+'円':[['o','えん','bei der Währung und für Kreise, z. B. 百円 (100 Yen), 円形 (Kreisform)'],['k','まるい/まる','als Adjektiv: 円い (rund)']],
+'王':[['o','おう','einzige Lesung, z. B. 王様 (König), 女王 (Königin)']],
+'音':[['o','おん','in Wörtern wie 音楽 (Musik), 発音 (Aussprache)'],['o','いん','in Wörtern wie 母音 (Vokal), 子音 (Konsonant)'],['k','おと','allein stehend oder hinten: 音 (Geräusch), 足音 (Schritte)'],['k','ね','für den Klang von Stimme oder Instrument, z. B. 音色 (Klangfarbe)']],
+'下':[['o','か','in Wörtern wie 地下 (Untergeschoss), 以下 (das Folgende)'],['o','げ','in Wörtern wie 下車 (Aussteigen), 下水 (Abwasser)'],['k','した','allein stehend oder vorn: 下 (unten), 下着 (Unterwäsche)'],['k','しも','bei Lagen wie 川下 (flussabwärts)'],['k','さがる/さげる/さ','Verb für nach unten gehen: 下がる (sinken), 下げる (senken)'],['k','くだる/くだ','Verb für bergab, flussabwärts: 下る (hinabgehen)'],['k','おりる/おろす/お','Verb für herabsteigen: 下りる (hinuntergehen)']],
+'花':[['o','か','in Wörtern wie 花瓶 (Vase), 開花 (Blüte)'],['k','はな','allein stehend oder vorn: 花 (Blume), 花束 (Blumenstrauß)']],
+'貝':[['k','かい','allein stehend oder vorn: 貝 (Muschel), 貝殻 (Muschelschale)']],
+'学':[['o','がく','in Wörtern wie 学校 (Schule), 大学 (Universität)'],['k','まなぶ/まな','als Verb: 学ぶ (lernen)']],
+'気':[['o','き','in Wörtern wie 天気 (Wetter), 元気 (gesund)'],['o','け','in Wörtern wie 気配 (Anzeichen), 寒気 (Frösteln)']],
+'九':[['o','きゅう','bei Zahlen, z. B. 九十 (neunzig), 九百 (neunhundert)'],['o','く','bei Monat und Uhrzeit, z. B. 九月 (September), 九時 (neun Uhr)'],['k','ここのつ','beim Zählen von Dingen: 九つ (neun Stück)'],['k','ここの','bei den Tagen des Monats, z. B. 九日 (neunter Tag)']],
+'休':[['o','きゅう','in Wörtern wie 休日 (freier Tag), 休憩 (Pause)'],['k','やすむ/やす/やすみ','als Verb: 休む (ausruhen), 休み (Pause)']],
+'玉':[['o','ぎょく','in Wörtern wie 玉座 (Thron)'],['k','たま','allein stehend oder hinten: 玉 (Kugel), 目玉 (Augapfel)']],
+'金':[['o','きん','in Wörtern wie 金曜日 (Freitag), 現金 (Bargeld)'],['o','こん','in Wörtern wie 黄金 (Gold), 金色 (goldfarben)'],['k','かね','allein stehend: 金 (Geld, Metall)'],['k','かな','vor einem anderen Wort, z. B. 金物 (Eisenwaren)']],
+'空':[['o','くう','in Wörtern wie 空気 (Luft), 空港 (Flughafen)'],['k','そら','allein stehend oder vorn: 空 (Himmel), 青空 (blauer Himmel)'],['k','あく/あける/あ','als Verb: 空く (leer werden)'],['k','から','vor einem anderen Wort, z. B. 空手 (Karate)']],
+'犬':[['o','けん','in Wörtern wie 番犬 (Wachhund)'],['k','いぬ','allein stehend oder hinten: 犬 (Hund), 子犬 (Welpe)']],
+'見':[['o','けん','in Wörtern wie 見学 (Besichtigung), 意見 (Meinung)'],['k','みる/み','als Verb: 見る (sehen)'],['k','みえる','als Verb: 見える (zu sehen sein)']],
+'五':[['o','ご','bei Zahlen und in Zusammensetzungen, z. B. 五月 (Mai), 五十 (fünfzig)'],['k','いつつ','beim Zählen von Dingen: 五つ (fünf Stück)'],['k','いつ','bei den Tagen des Monats, z. B. 五日 (fünfter Tag)']],
+'口':[['o','こう','in Wörtern wie 人口 (Bevölkerung), 口座 (Konto)'],['o','く','in Redewendungen wie 異口同音 (einstimmig)'],['k','くち','allein stehend oder hinten: 口 (Mund), 出口 (Ausgang)']],
+'校':[['o','こう','einzige Lesung, z. B. 学校 (Schule), 校長 (Schulleiter)']],
+'左':[['o','さ','in Wörtern wie 左折 (links abbiegen), 左右 (links und rechts)'],['k','ひだり','allein stehend oder vorn: 左 (links), 左手 (linke Hand)']],
+'子':[['o','し','in Wörtern wie 男子 (Junge), 子孫 (Nachkommen)'],['o','す','in einzelnen Wörtern wie 椅子 (Stuhl), 様子 (Zustand)'],['k','こ','allein stehend oder vorn: 子 (Kind), 子供 (Kind)']],
+'四':[['o','し','bei Monat und Formen, z. B. 四月 (April), 四角 (Viereck)'],['k','よっつ','beim Zählen von Dingen: 四つ (vier Stück)'],['k','よん','als Zahlwort, z. B. 四百 (vierhundert)'],['k','よ','bei Uhrzeit und Personen, z. B. 四時 (vier Uhr), 四人 (vier Personen)']],
+'糸':[['o','し','in Fachwörtern wie 綿糸 (Baumwollgarn)'],['k','いと','allein stehend oder vorn: 糸 (Faden), 毛糸 (Wolle)']],
+'字':[['o','じ','in Wörtern wie 文字 (Schriftzeichen), 数字 (Ziffer)'],['k','あざ','bei Ortsnamen: 字 (Ortsteil)']],
+'耳':[['o','じ','in Fachwörtern wie 耳鼻科 (HNO-Abteilung)'],['k','みみ','allein stehend oder vorn: 耳 (Ohr), 耳元 (neben dem Ohr)']],
+'七':[['o','しち','bei Zahlen und in Zusammensetzungen, z. B. 七月 (Juli), 七十 (siebzig)'],['k','ななつ','beim Zählen von Dingen: 七つ (sieben Stück)'],['k','なな','als Zahlwort bei Personen, z. B. 七人 (sieben Personen)'],['k','なの','bei den Tagen des Monats, z. B. 七日 (siebter Tag)']],
+'車':[['o','しゃ','in Wörtern wie 電車 (Zug), 自転車 (Fahrrad)'],['k','くるま','allein stehend oder vorn: 車 (Auto), 車椅子 (Rollstuhl)']],
+'手':[['o','しゅ','in Wörtern wie 歌手 (Sänger), 選手 (Spieler)'],['k','て','allein stehend oder vorn: 手 (Hand), 手紙 (Brief)'],['k','た','in seltenen Wörtern wie 手綱 (Zügel)']],
+'十':[['o','じゅう','bei Zahlen, z. B. 十月 (Oktober), 二十 (zwanzig)'],['o','じっ','vor k-, p-Lauten, z. B. 十回 (zehnmal)'],['k','とお','beim Zählen von Dingen: 十 (zehn Stück)'],['k','と','in Wörtern wie 十色 (zehn Farben)']],
+'出':[['o','しゅつ','in Wörtern wie 出発 (Abfahrt), 出席 (Teilnahme)'],['k','でる/で','als Verb: 出る (hinausgehen)'],['k','だす/だ','als Verb: 出す (herausnehmen)']],
+'女':[['o','じょ','in Wörtern wie 少女 (Mädchen), 女子 (Mädchen)'],['o','にょう/にょ','in alten Wörtern wie 女房 (Ehefrau)'],['k','おんな','allein stehend oder vorn: 女 (Frau), 女の子 (Mädchen)'],['k','め','in Wörtern wie 女神 (Göttin)']],
+'上':[['o','じょう','in Wörtern wie 上達 (Fortschritt), 上手 (geschickt)'],['o','しょう','in alten Wörtern wie 上人 (Heiliger)'],['k','うえ','allein stehend oder hinten: 上 (oben), 目上 (Vorgesetzter)'],['k','かみ','bei Lagen wie 川上 (flussaufwärts)'],['k','あがる','Verb für hinaufgehen: 上がる (steigen)'],['k','あげる','Verb für hinaufbringen: 上げる (heben)'],['k','のぼる','Verb für hinaufsteigen: 上る (erklimmen)']],
+'森':[['o','しん','in Wörtern wie 森林 (Wald)'],['k','もり','allein stehend oder vorn: 森 (Wald), 森の中']],
+'正':[['o','せい','in Wörtern wie 正解 (richtige Antwort), 正式 (offiziell)'],['o','しょう','in Wörtern wie 正直 (ehrlich), 正月 (Neujahr)'],['k','ただしい/ただ','als Adjektiv: 正しい (richtig)'],['k','まさ','als Adverb und in Namen: 正に (genau)']],
+'生':[['o','せい','in Wörtern wie 先生 (Lehrer), 学生 (Student)'],['o','しょう','in Wörtern wie 一生 (ein Leben lang), 誕生 (Geburt)'],['k','いきる/いき','Verb für leben: 生きる (leben)'],['k','うまれる/うむ','Verb für geboren werden: 生まれる'],['k','はえる','Verb für wachsen: 生える (sprießen)'],['k','なま','vor einem Wort: 生 (roh), 生ビール (Fassbier)'],['k','き','bei reinem Zustand: 生地 (Stoff, Teig)']],
+'青':[['o','せい','in Wörtern wie 青年 (Jugendlicher), 青春 (Jugend)'],['o','しょう','in Wörtern wie 緑青 (Grünspan)'],['k','あおい/あお','allein stehend oder als Adjektiv: 青 (Blau), 青い (blau)']],
+'夕':[['o','せき','in Wörtern wie 一朝一夕 (kurze Zeit)'],['k','ゆう','vor einem Wort: 夕方 (Abend), 夕日 (Abendsonne)']],
+'石':[['o','せき','in Wörtern wie 石油 (Erdöl), 化石 (Fossil)'],['o','しゃく','in Wörtern wie 磁石 (Magnet)'],['o','こく','bei alten Maßen wie 石高 (Reisertrag)'],['k','いし','allein stehend oder vorn: 石 (Stein), 石段 (Steintreppe)']],
+'赤':[['o','せき','in Wörtern wie 赤道 (Äquator)'],['k','あかい/あか','allein stehend oder als Adjektiv: 赤 (Rot), 赤い (rot)']],
+'千':[['o','せん','bei Zahlen, z. B. 千円 (1000 Yen), 三千 (dreitausend)'],['k','ち','in einzelnen Wörtern wie 千鳥 (Regenpfeifer)']],
+'先':[['o','せん','in Wörtern wie 先生 (Lehrer), 先週 (letzte Woche)'],['k','さき','allein stehend oder hinten: 先 (Spitze, Zukunft), 指先 (Fingerspitze)']],
+'早':[['o','そう','in Wörtern wie 早朝 (frühmorgens)'],['o','さっ','in Wörtern wie 早速 (sofort)'],['k','はやい/はや','als Adjektiv: 早い (früh)']],
+'草':[['o','そう','in Wörtern wie 草原 (Wiese), 雑草 (Unkraut)'],['k','くさ','allein stehend oder vorn: 草 (Gras), 草花 (Blumen)']],
+'足':[['o','そく','in Wörtern wie 満足 (Zufriedenheit), 不足 (Mangel)'],['k','あし','allein stehend oder vorn: 足 (Fuß), 足音 (Schritte)'],['k','たりる/たる','Verb für genügen: 足りる'],['k','たす','Verb für hinzufügen: 足す (addieren)']],
+'村':[['o','そん','in Wörtern wie 農村 (Bauerndorf), 村長 (Dorfvorsteher)'],['k','むら','allein stehend oder vorn: 村 (Dorf), 村人 (Dorfbewohner)']],
+'男':[['o','だん','in Wörtern wie 男子 (Junge), 男性 (Mann)'],['o','なん','in Wörtern wie 長男 (ältester Sohn)'],['k','おとこ','allein stehend oder vorn: 男 (Mann), 男の子 (Junge)']],
+'竹':[['o','ちく','in Wörtern wie 竹林 (Bambushain)'],['k','たけ','allein stehend oder vorn: 竹 (Bambus), 竹やぶ (Bambusdickicht)']],
+'中':[['o','ちゅう','in Wörtern wie 中学 (Mittelschule), 中心 (Zentrum)'],['o','じゅう','bei Zeit und Raum, z. B. 一日中 (den ganzen Tag), 世界中 (weltweit)'],['k','なか','allein stehend oder vorn: 中 (Mitte, Innen), 中身 (Inhalt)']],
+'虫':[['o','ちゅう','in Wörtern wie 昆虫 (Insekt)'],['k','むし','allein stehend oder vorn: 虫 (Insekt), 虫歯 (Karies)']],
+'町':[['o','ちょう','in Wörtern wie 町長 (Bürgermeister)'],['k','まち','allein stehend oder hinten: 町 (Stadt), 下町 (Altstadt)']],
+'天':[['o','てん','in Wörtern wie 天気 (Wetter), 天国 (Paradies)'],['k','あま','in Wörtern wie 天の川 (Milchstraße)'],['k','あめ','in alten Wörtern wie 天地 (Himmel und Erde)']],
+'田':[['o','でん','in Wörtern wie 水田 (Reisfeld), 油田 (Ölfeld)'],['k','た','allein stehend oder vorn: 田 (Reisfeld), 田んぼ (Reisfeld)']],
+'土':[['o','ど','in Wörtern wie 土曜日 (Samstag), 土木 (Tiefbau)'],['o','と','in Wörtern wie 土地 (Grundstück)'],['k','つち','allein stehend oder vorn: 土 (Erde), 土煙 (Staubwolke)']],
+'入':[['o','にゅう','in Wörtern wie 入学 (Einschulung), 入場 (Eintritt)'],['k','はいる','als gewöhnliches Verb: 入る (eintreten)'],['k','いる','in festen Wendungen wie 気に入る (gefallen)'],['k','いれる','Verb für hineintun: 入れる']],
+'年':[['o','ねん','in Wörtern wie 来年 (nächstes Jahr), 一年 (ein Jahr)'],['k','とし','allein stehend oder vorn: 年 (Jahr, Alter), 年上 (älter)']],
+'白':[['o','はく','in Wörtern wie 白鳥 (Schwan), 白紙 (leeres Blatt)'],['o','びゃく','in Wörtern wie 白夜 (Polarnacht)'],['k','しろい/しろ','allein stehend oder als Adjektiv: 白 (Weiß), 白い (weiß)']],
+'八':[['o','はち','bei Zahlen und Monat, z. B. 八月 (August), 八十 (achtzig)'],['k','やっつ','beim Zählen von Dingen: 八つ (acht Stück)'],['k','や','in einzelnen Wörtern wie 八百屋 (Gemüsehändler)'],['k','よう','bei den Tagen des Monats, z. B. 八日 (achter Tag)']],
+'百':[['o','ひゃく','einzige Lesung bei Zahlen, z. B. 百円 (100 Yen), 三百 (dreihundert)']],
+'文':[['o','ぶん','in Wörtern wie 作文 (Aufsatz), 文章 (Text)'],['o','もん','in Wörtern wie 文句 (Beschwerde), 注文 (Bestellung)'],['k','ふみ','in alten Wörtern und Namen: 文 (Brief)']],
+'木':[['o','もく','in Wörtern wie 木曜日 (Donnerstag), 木材 (Holz)'],['o','ぼく','in Wörtern wie 土木 (Tiefbau), 大木 (Riesenbaum)'],['k','き','allein stehend oder vorn: 木 (Baum), 木の実 (Nuss)'],['k','こ','vor einem Wort, z. B. 木陰 (Schatten), 木立 (Baumgruppe)']],
+'本':[['o','ほん','in Wörtern wie 日本 (Japan), 本当 (wirklich)'],['k','もと','für den Ursprung, auch in Namen: 山本 (Familienname)']],
+'名':[['o','めい','in Wörtern wie 有名 (berühmt), 名刺 (Visitenkarte)'],['o','みょう','in Wörtern wie 名字 (Familienname)'],['k','な','allein stehend oder vorn: 名 (Name), 名乗る (sich vorstellen)']],
+'目':[['o','もく','in Wörtern wie 目的 (Ziel), 注目 (Aufmerksamkeit)'],['o','ぼく','in Wörtern wie 面目 (Ansehen)'],['k','め','allein stehend oder hinten: 目 (Auge), 目覚まし (Wecker)'],['k','ま','in Wörtern wie 目の当たり (vor Augen)']],
+'立':[['o','りつ','in Wörtern wie 国立 (staatlich), 独立 (Unabhängigkeit)'],['o','りゅう','in Wörtern wie 建立 (Errichtung)'],['k','たつ','Verb für stehen: 立つ (aufstehen)'],['k','たてる','Verb für aufstellen: 立てる (errichten)']],
+'力':[['o','りょく','in Wörtern wie 努力 (Anstrengung), 協力 (Zusammenarbeit)'],['o','りき','in Wörtern wie 力士 (Sumo-Ringer), 自力 (aus eigener Kraft)'],['k','ちから','allein stehend oder vorn: 力 (Kraft), 力持ち (starker Mensch)']],
+'林':[['o','りん','in Wörtern wie 森林 (Wald), 林業 (Forstwirtschaft)'],['k','はやし','allein stehend oder vorn: 林 (Wäldchen), 松林 (Kiefernwald)']],
+'六':[['o','ろく','bei Zahlen und Monat, z. B. 六月 (Juni), 六十 (sechzig)'],['k','むっつ','beim Zählen von Dingen: 六つ (sechs Stück)'],['k','む','bei den Tagen des Monats, z. B. 六日 (sechster Tag)']],
+'何':[['o','か','in seltenen Wörtern wie 幾何 (Geometrie)'],['k','なに','allein stehend: 何 (was?), 何か (etwas)'],['k','なん','vor t-, d-, n-Lauten und Zählwörtern: 何時 (wie spät), 何人 (wie viele Personen)']],
+'今':[['o','こん','in Wörtern wie 今月 (dieser Monat), 今週 (diese Woche)'],['o','きん','in seltenen Wörtern wie 今上 (der jetzige Kaiser)'],['k','いま','allein stehend: 今 (jetzt)']],
+'時':[['o','じ','bei Uhrzeit und Zeit: 三時 (drei Uhr), 時間 (Zeit)'],['k','とき','allein stehend: 時 (Zeitpunkt), 時々 (manchmal)']],
+'分':[['o','ふん','bei Minuten nach 2, 5, 7, 9: 五分 (fünf Minuten)'],['o','ぷん','bei Minuten nach 1, 3, 4, 6, 8, 10: 三分, 十分 (zehn Minuten)'],['o','ぶん','in Wörtern wie 自分 (selbst), 半分 (Hälfte)'],['o','ぶ','in Wörtern wie 大分 (ziemlich)'],['k','わかる/わか','als Verb: 分かる (verstehen)'],['k','わける/わけ','als Verb: 分ける (teilen)']],
+'半':[['o','はん','in Wörtern wie 半分 (Hälfte), 三時半 (halb vier)'],['k','なかば','allein stehend: 半ば (Mitte, halb)']],
+'午':[['o','ご','einzige Lesung: 午前 (vormittags), 午後 (nachmittags)']],
+'前':[['o','ぜん','in Wörtern wie 午前 (vormittags), 前後 (vorher und nachher)'],['k','まえ','allein stehend oder hinten: 前 (vorne), 名前 (Name)']],
+'後':[['o','ご','in Wörtern wie 午後 (nachmittags), 最後 (zuletzt)'],['o','こう','in Wörtern wie 後半 (zweite Hälfte), 後輩 (Jüngerer)'],['k','あと','allein stehend: 後 (danach), 後で (später)'],['k','うしろ','für die Richtung: 後ろ (hinten)'],['k','のち','in Wörtern wie 後ほど (nachher)']],
+'毎':[['o','まい','einzige Lesung, vor Zeitwörtern: 毎日 (jeden Tag), 毎朝 (jeden Morgen)']],
+'週':[['o','しゅう','einzige Lesung: 今週 (diese Woche), 毎週 (jede Woche)']],
+'父':[['o','ふ','in Wörtern wie 父母 (Eltern), 祖父 (Großvater)'],['k','ちち','für den eigenen Vater: 父 (Vater)']],
+'母':[['o','ぼ','in Wörtern wie 父母 (Eltern), 母国 (Heimatland)'],['k','はは','für die eigene Mutter: 母 (Mutter)']],
+'友':[['o','ゆう','in Wörtern wie 友人 (Freund), 友情 (Freundschaft)'],['k','とも','allein stehend oder vorn: 友 (Freund), 友達 (Freund)']],
+'会':[['o','かい','in Wörtern wie 会社 (Firma), 会話 (Gespräch)'],['o','え','in seltenen Wörtern wie 会釈 (leichte Verbeugung)'],['k','あう/あ','als Verb: 会う (treffen)']],
+'社':[['o','しゃ','in Wörtern wie 会社 (Firma), 社会 (Gesellschaft)'],['o','じゃ','als Endung: 神社 (Schrein)'],['k','やしろ','allein stehend: 社 (Schrein)']],
+'国':[['o','こく','in Wörtern wie 国語 (Landessprache), 外国 (Ausland)'],['o','ごく','als Endung: 中国 (China)'],['k','くに','allein stehend: 国 (Land)']],
+'語':[['o','ご','als Endung für Sprachen: 日本語 (Japanisch), 英語 (Englisch)'],['k','かたる/かた','als Verb: 語る (erzählen)']],
+'外':[['o','がい','in Wörtern wie 外国 (Ausland), 外出 (Ausgehen)'],['o','げ','in Wörtern wie 外科 (Chirurgie)'],['k','そと','allein stehend: 外 (draußen)'],['k','ほか','für etwas anderes: 外の人 (andere Leute)']],
+'来':[['o','らい','in Wörtern wie 来年 (nächstes Jahr), 来週 (nächste Woche)'],['k','くる/く','als Verb in der Grundform: 来る (kommen)'],['k','き/きます','in der höflichen Form: 来ます (kommt)'],['k','こ/こない','in der Verneinung: 来ない (kommt nicht)']],
+'行':[['o','こう','in Wörtern wie 旅行 (Reise), 銀行 (Bank)'],['o','ぎょう','in Wörtern wie 行事 (Veranstaltung)'],['k','いく/い','als Verb: 行く (gehen)'],['k','おこなう/おこな','als Verb: 行う (durchführen)']],
+'食':[['o','しょく','in Wörtern wie 食事 (Mahlzeit), 食堂 (Kantine)'],['k','たべる/たべ','als Verb: 食べる (essen)'],['k','くう/く','umgangssprachlich: 食う (futtern)']],
+'飲':[['o','いん','in Wörtern wie 飲食 (Essen und Trinken), 飲料 (Getränk)'],['k','のむ/の','als Verb: 飲む (trinken), 飲み物 (Getränk)']],
+'言':[['o','げん','in Wörtern wie 言語 (Sprache)'],['o','ごん','in Wörtern wie 伝言 (Nachricht)'],['k','いう/い','als Verb: 言う (sagen)'],['k','こと','in Wörtern wie 言葉 (Wort)']],
+'話':[['o','わ','in Wörtern wie 会話 (Gespräch), 電話 (Telefon)'],['k','はなす/はな','als Verb: 話す (sprechen)'],['k','はなし','als Nomen: 話 (Geschichte, Gespräch)']],
+'読':[['o','どく','in Wörtern wie 読書 (Lesen), 音読 (Vorlesen)'],['k','よむ/よ','als Verb: 読む (lesen)']],
+'書':[['o','しょ','in Wörtern wie 辞書 (Wörterbuch), 図書館 (Bibliothek)'],['k','かく/か','als Verb: 書く (schreiben)']],
+'聞':[['o','ぶん','in Wörtern wie 新聞 (Zeitung)'],['o','もん','in seltenen Wörtern wie 聴聞 (Anhörung)'],['k','きく/き','als Verb: 聞く (hören, fragen)'],['k','きこえる','als Verb: 聞こえる (zu hören sein)']],
+'買':[['o','ばい','in Wörtern wie 売買 (Handel)'],['k','かう/か','als Verb: 買う (kaufen), 買い物 (Einkauf)']],
+'安':[['o','あん','in Wörtern wie 安心 (Beruhigung), 安全 (Sicherheit)'],['k','やすい/やす','als Adjektiv: 安い (billig)']],
+'高':[['o','こう','in Wörtern wie 高校 (Oberschule), 最高 (das Beste)'],['k','たかい/たか','als Adjektiv: 高い (hoch, teuer)']],
+'新':[['o','しん','in Wörtern wie 新聞 (Zeitung), 新年 (Neujahr)'],['k','あたらしい/あたらし','als Adjektiv: 新しい (neu)'],['k','あらた','in Wendungen wie 新たに (aufs Neue)']],
+'古':[['o','こ','in Wörtern wie 古代 (Altertum), 中古 (gebraucht)'],['k','ふるい/ふる','als Adjektiv: 古い (alt)']],
+'長':[['o','ちょう','in Wörtern wie 社長 (Firmenchef), 部長 (Abteilungsleiter)'],['k','ながい/なが','als Adjektiv: 長い (lang)']],
+'多':[['o','た','in Wörtern wie 多分 (vielleicht), 多数 (Mehrheit)'],['k','おおい/おお','als Adjektiv: 多い (viel)']],
+'少':[['o','しょう','in Wörtern wie 少年 (Junge), 少女 (Mädchen)'],['k','すくない/すくな','als Adjektiv: 少ない (wenig)'],['k','すこし/すこ','als Adverb: 少し (ein bisschen)']],
+'東':[['o','とう','in Wörtern wie 東京 (Tokio), 東北 (Nordosten)'],['k','ひがし','allein stehend: 東 (Osten)']],
+'西':[['o','せい','in Wörtern wie 西洋 (der Westen), 北西 (Nordwesten)'],['o','さい','in Wörtern wie 関西 (Kansai)'],['k','にし','allein stehend: 西 (Westen)']],
+'南':[['o','なん','in Wörtern wie 南極 (Südpol), 東南 (Südosten)'],['k','みなみ','allein stehend: 南 (Süden)']],
+'北':[['o','ほく','in Wörtern wie 南北 (Nord und Süd), 東北 (Nordosten)'],['o','ほっ','vor k-Lauten: 北極 (Nordpol), 北海道 (Hokkaido)'],['k','きた','allein stehend: 北 (Norden)']],
+'道':[['o','どう','in Wörtern wie 道路 (Straße), 水道 (Wasserleitung)'],['o','とう','in Wörtern wie 神道 (Shintō)'],['k','みち','allein stehend: 道 (Weg)']],
+'駅':[['o','えき','einzige Lesung: 駅 (Bahnhof), 駅前 (vor dem Bahnhof)']],
+'電':[['o','でん','einzige Lesung: 電車 (Zug), 電話 (Telefon)']],
+'店':[['o','てん','in Wörtern wie 店員 (Verkäufer), 書店 (Buchhandlung)'],['k','みせ','allein stehend: 店 (Laden)']],
+'魚':[['o','ぎょ','in Wörtern wie 金魚 (Goldfisch), 魚類 (Fische)'],['k','さかな','allein stehend: 魚 (Fisch)'],['k','うお','in Wörtern wie 魚市場 (Fischmarkt)']],
+'間':[['o','かん','in Wörtern wie 時間 (Zeit), 一週間 (eine Woche)'],['o','けん','in Wörtern wie 人間 (Mensch)'],['k','あいだ','allein stehend: 間 (zwischen, Zeitraum)'],['k','ま','in Wörtern wie 間に合う (rechtzeitig sein)']],
+'万':[['o','まん','bei Zahlen: 一万 (zehntausend), 百万 (eine Million)'],['o','ばん','in Wörtern wie 万歳 (Hurra), 万一 (im Notfall)']]
+};
+const GR={o:["Onyomi · chinesische Lesung","Wird meist in Wörtern aus mehreren Kanji verwendet."],k:["Kunyomi · japanische Lesung","Wird meist allein stehend oder mit Hiragana-Endung verwendet."]};
+const D=[
+["一","いち","ichi",["eins","1"],"Ein einzelner Strich, wie die Zahl 1 auf einem Strichblatt."],
+["二","に","ni",["zwei","2"],"Zwei Striche übereinander, zwei Nudeln im Napf (ni)."],
+["三","さん","san",["drei","3"],"Drei Striche, drei Sonnenstrahlen (san wie Sonne)."],
+["人","ひと","hito",["mensch","person"],"Eine Person, die mit gespreizten Beinen steht."],
+["大","だい","dai",["groß","gross"],"Ein Mensch breitet die Arme aus: so groß! Dai wie „die Größe“."],
+["小","しょう","shou",["klein"],"Drei kleine Tropfen: ganz klein."],
+["山","やま","yama",["berg"],"Drei Gipfel, der mittlere ist der höchste."],
+["川","かわ","kawa",["fluss"],"Drei Wasserlinien, die nach unten fließen."],
+["日","にち","nichi",["tag","sonne"],"Ein Fenster, durch das die Sonne scheint."],
+["月","つき","tsuki",["mond","monat"],"Eine schmale Mondsichel mit zwei Wolkenstreifen."],
+["火","か","ka",["feuer"],"Ein Lagerfeuer mit zwei Funken. Ka wie „kalt? Nicht hier!“"],
+["水","みず","mizu",["wasser"],"Ein Wasserstrahl, der in alle Richtungen spritzt."],
+['右','みぎ','migi',['rechts'],'Ein Mund unter einer Hand: gegessen wird meist mit rechts.'],
+['雨','あめ','ame',['regen'],'Ein Fenster, aus dem Tropfen fallen.'],
+['円','えん','en',['yen','kreis'],'Eine Münze im Rahmen. En wie Yen.'],
+['王','おう','ou',['könig'],'Drei Ebenen, vom Stab verbunden: Himmel, Mensch, Erde.'],
+['音','おと','oto',['geräusch','klang','ton'],'Unter einem Stand tönt ein Klang.'],
+['下','した','shita',['unten','unter'],'Der Strich liegt oben, der Punkt hängt darunter.'],
+['花','はな','hana',['blume'],'Gras oben, darunter verwandelt sich etwas: es blüht.'],
+['貝','かい','kai',['muschel'],'Eine Muschel mit zwei Beinchen.'],
+['学','がく','gaku',['lernen','schule'],'Ein Kind unter dem Dach lernt.'],
+['気','き','ki',['energie','geist','luft'],'Dampf steigt aus einem Topf: Ki, Lebensenergie.'],
+['九','きゅう','kyuu',['neun','9'],'Wie die Ziffer 9 mit Haken.'],
+['休','やすむ','yasumu',['ausruhen','pause'],'Ein Mensch lehnt sich an einen Baum: Pause.'],
+['玉','たま','tama',['kugel','juwel'],'Ein König mit einem Punkt: sein Juwel.'],
+['金','きん','kin',['gold','geld'],'Unter einem Dach liegen glänzende Goldstücke.'],
+['空','そら','sora',['himmel','leer'],'Ein Dach mit Öffnung: leerer, weiter Himmel.'],
+['犬','いぬ','inu',['hund'],'Ein großer Mensch mit einem Ohr-Punkt: der Hund.'],
+['見','みる','miru',['sehen','anschauen'],'Ein Auge auf zwei Beinen: hingehen und schauen.'],
+['五','ご','go',['fünf','5'],'Fünf Finger. Go, zähl bis fünf!'],
+['口','くち','kuchi',['mund'],'Ein offener, viereckiger Mund.'],
+['校','こう','kou',['schule'],'Ein Baum und Kreuzungen: in der Schule wächst man.'],
+['左','ひだり','hidari',['links'],'Hand und Lineal: links hält man das Lineal.'],
+['子','こ','ko',['kind'],'Ein Kind mit ausgestreckten Armen.'],
+['四','よん','yon',['vier','4'],'Ein Fenster mit vier Seiten.'],
+['糸','いと','ito',['faden'],'Ein verdrillter Faden.'],
+['字','じ','ji',['schriftzeichen','buchstabe'],'Ein Kind unter dem Dach lernt die Zeichen.'],
+['耳','みみ','mimi',['ohr'],'Eine Ohrmuschel.'],
+['七','なな','nana',['sieben','7'],'Wie eine Sieben mit Haken.'],
+['車','くるま','kuruma',['auto','wagen'],'Ein Wagen von oben: Achse und zwei Räder.'],
+['手','て','te',['hand'],'Eine Hand mit Fingern und Handgelenk.'],
+['十','じゅう','juu',['zehn','10'],'Ein Kreuz steht für zehn.'],
+['出','でる','deru',['herausgehen','verlassen'],'Ein Berg über dem anderen: man geht hinaus.'],
+['女','おんな','onna',['frau'],'Eine kniende Frau.'],
+['上','うえ','ue',['oben','über'],'Der Strich liegt unten, der Punkt thront darüber.'],
+['森','もり','mori',['wald'],'Drei Bäume: ein richtiger Wald.'],
+['正','ただしい','tadashii',['richtig','korrekt'],'Ein Strich über dem Stopp: genau richtig.'],
+['生','せい','sei',['leben','geboren'],'Ein Keimling wächst aus dem Boden.'],
+['青','あお','ao',['blau','grün'],'Das blaue Licht der Dämmerung.'],
+['夕','ゆう','yuu',['abend'],'Ein halber Mond am Abend.'],
+['石','いし','ishi',['stein'],'Ein Fels, darunter liegt ein Stein.'],
+['赤','あか','aka',['rot'],'Ein Feuer färbt die Erde rot.'],
+['千','せん','sen',['tausend','1000'],'Ein Mensch mit einem Strich: tausend.'],
+['先','さき','saki',['voraus','vorher'],'Ein Mensch, der vorangeht.'],
+['早','はやい','hayai',['früh','schnell'],'Die Sonne über einem Kreuz: früh am Morgen.'],
+['草','くさ','kusa',['gras'],'Pflanzen oben, früh gewachsen.'],
+['足','あし','ashi',['fuß','bein'],'Knie, Bein und Fuß untereinander.'],
+['村','むら','mura',['dorf'],'Ein Baum und ein Maßstab: ein kleines Dorf.'],
+['男','おとこ','otoko',['mann'],'Ein Feld und Kraft: Männer arbeiten dort.'],
+['竹','たけ','take',['bambus'],'Zwei Bambusblätter.'],
+['中','なか','naka',['mitte','innen'],'Ein Pfeil trifft genau die Mitte.'],
+['虫','むし','mushi',['insekt','käfer'],'Ein Käfer mit Fühler.'],
+['町','まち','machi',['stadt','viertel'],'Ein Feld und ein Nagel: das Stadtviertel.'],
+['天','てん','ten',['himmel'],'Ein Mensch mit einem Strich darüber: der Himmel.'],
+['田','た','ta',['reisfeld','feld'],'Ein Reisfeld mit Deichen.'],
+['土','つち','tsuchi',['erde','boden'],'Ein Pflänzchen auf dem Boden.'],
+['入','にゅう','nyuu',['eintreten','hineingehen'],'Ein Pfeil, der hineinführt.'],
+['年','とし','toshi',['jahr'],'Jedes Jahr kommt eine neue Ernte.'],
+['白','しろ','shiro',['weiß','weiss'],'Die Sonne mit einem Strahl: weißes Licht.'],
+['八','はち','hachi',['acht','8'],'Zwei Striche gehen auseinander. Hachi!'],
+['百','ひゃく','hyaku',['hundert','100'],'Eine Eins über Weiß: hundert.'],
+['文','ぶん','bun',['text','satz'],'Gekreuzte Striche wie ein Schriftmuster.'],
+['木','き','ki',['baum','holz'],'Stamm, Äste und Wurzeln.'],
+['本','ほん','hon',['buch','ursprung'],'Ein Baum mit markierter Wurzel: der Ursprung.'],
+['名','な','na',['name'],'Abend und Mund: im Dunkeln ruft man den Namen.'],
+['目','め','me',['auge'],'Ein hochkant stehendes Auge.'],
+['立','たつ','tatsu',['stehen','aufstehen'],'Ein Mensch steht auf dem Boden.'],
+['力','ちから','chikara',['kraft'],'Ein angespannter Arm.'],
+['林','はやし','hayashi',['wäldchen','hain'],'Zwei Bäume: ein kleiner Wald.'],
+['六','ろく','roku',['sechs','6'],'Ein Dach auf zwei Beinen. Roku!'],
+['何','なに','nani',['was','wie viel'],'Ein Mensch (亻) mit einem Fragehaken daneben: was?'],
+['今','いま','ima',['jetzt'],'Ein Dach über einem Haken: genau jetzt, unter diesem Dach.'],
+['時','じ','ji',['zeit','uhr','stunde'],'Sonne (日) und Tempel (寺): die Tempelglocke schlägt die Stunde.'],
+['分','ふん','fun',['minute','teil','verstehen'],'Ein Messer (刀) teilt etwas: Teil, Minute, und wer teilt, versteht.'],
+['半','はん','han',['halb','hälfte'],'Ein Strich teilt alles genau in der Mitte: halb.'],
+['午','ご','go',['mittag'],'Ein Stab steht senkrecht in der Mittagssonne.'],
+['前','まえ','mae',['vor','vorne','vorher'],'Zwei Striche zeigen nach vorn, darunter ein Boot: vorne.'],
+['後','あと','ato',['nach','hinten','später'],'Ein Schritt (彳) mit kleinen Fäden: man folgt hinterher.'],
+['毎','まい','mai',['jeder','jede'],'Eine Mutter (母) mit Hut: jeden Tag dasselbe.'],
+['週','しゅう','shuu',['woche'],'Ein Weg (⻌) einmal rundherum: eine Woche.'],
+['父','ちち','chichi',['vater'],'Zwei gekreuzte Äxte: der Vater arbeitet.'],
+['母','はは','haha',['mutter'],'Eine Frau mit zwei Punkten: die Mutter.'],
+['友','とも','tomo',['freund'],'Zwei Hände greifen ineinander: Freunde.'],
+['会','かい','kai',['treffen','versammlung'],'Menschen unter einem Dach kommen zusammen.'],
+['社','しゃ','sha',['firma','schrein'],'Ein Altar (礻) auf der Erde (土): Schrein, heute auch Firma.'],
+['国','くに','kuni',['land','staat'],'Ein Juwel (玉) hinter einer Mauer: das Land.'],
+['語','ご','go',['sprache','wort'],'Worte (言) aus fünf (五) Mündern (口): Sprache.'],
+['外','そと','soto',['außen','draußen'],'Abend (夕) und ein Orakelstab (卜): man geht hinaus.'],
+['来','くる','kuru',['kommen'],'Ein Baum mit Ähren: die Ernte kommt.'],
+['行','いく','iku',['gehen'],'Eine Kreuzung von oben: hier geht man los.'],
+['食','たべる','taberu',['essen'],'Ein Dach über einer gefüllten Schüssel: Essen.'],
+['飲','のむ','nomu',['trinken'],'Essen (食) und ein offener Mund (欠): trinken.'],
+['言','いう','iu',['sagen'],'Worte steigen aus einem Mund (口) auf.'],
+['話','はなす','hanasu',['sprechen','gespräch','geschichte'],'Worte (言) und eine Zunge (舌): sprechen.'],
+['読','よむ','yomu',['lesen'],'Worte (言) verkaufen (売): laut vorlesen.'],
+['書','かく','kaku',['schreiben'],'Eine Hand hält einen Pinsel über einem Blatt: schreiben.'],
+['聞','きく','kiku',['hören','fragen'],'Ein Ohr (耳) im Tor (門): lauschen.'],
+['買','かう','kau',['kaufen'],'Ein Netz (罒) über einer Muschel (貝), früher Geld: kaufen.'],
+['安','やすい','yasui',['billig','ruhig','sicher'],'Eine Frau unter dem Dach: alles ist ruhig und sicher.'],
+['高','たかい','takai',['hoch','teuer'],'Ein hoher Turm mit mehreren Stockwerken.'],
+['新','あたらしい','atarashii',['neu'],'Stehen (立), Baum (木) und Axt (斤): frisch gefälltes Holz ist neu.'],
+['古','ふるい','furui',['alt'],'Zehn (十) Münder (口) erzählen alte Geschichten.'],
+['長','ながい','nagai',['lang','chef','leiter'],'Langes Haar, das im Wind weht.'],
+['多','おおい','ooi',['viel','viele'],'Zwei Abende (夕) übereinander: viele Tage.'],
+['少','すくない','sukunai',['wenig','ein bisschen'],'Klein (小) mit einem Strich weggenommen: wenig.'],
+['東','ひがし','higashi',['osten'],'Die Sonne (日) geht hinter dem Baum (木) auf: Osten.'],
+['西','にし','nishi',['westen'],'Ein Vogel sitzt abends im Nest: Westen, wo die Sonne untergeht.'],
+['南','みなみ','minami',['süden'],'Ein Zelt mit Dach im warmen Süden.'],
+['北','きた','kita',['norden'],'Zwei Menschen sitzen Rücken an Rücken auf der kalten Seite.'],
+['道','みち','michi',['weg','straße'],'Ein Kopf (首) auf dem Weg (⻌): der Weg.'],
+['駅','えき','eki',['bahnhof','station'],'Ein Pferd (馬) an der Station: früher Poststation, heute Bahnhof.'],
+['電','でん','den',['elektrizität','strom'],'Regen (雨) mit einem Blitz darunter: Strom.'],
+['店','みせ','mise',['laden','geschäft'],'Ein Dach (广) über einem Stand: ein kleiner Laden.'],
+['魚','さかな','sakana',['fisch'],'Kopf, Schuppenkörper und vier Flossen: ein Fisch.'],
+['間','あいだ','aida',['zwischen','zeitraum','raum'],'Die Sonne (日) scheint durch ein Tor (門): der Raum dazwischen.'],
+['万','まん','man',['zehntausend','10000'],'Ein Haken mit Strich: zehntausend, eine riesige Zahl.']
+].map(([k,r,ro,m,h],i)=>({i,k,r,ro,m,h,l:Math.floor(i/10)+1}));
+const DK=Object.fromEntries(D.map(d=>[d.k,d]));
+
+/* ---------- Antworten prüfen ---------- */
+const norm=s=>String(s).trim().toLowerCase().replace(/^(der|die|das|ein|eine) /,'').replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss');
+const dist=(a,b)=>{if(a==b)return 0;if(Math.abs(a.length-b.length)>1)return 2;if(a.length==b.length){const x=[];for(let i=0;i<a.length;i++)if(a[i]!=b[i])x.push(i);if(x.length==1)return 1;if(x.length==2&&x[1]==x[0]+1&&a[x[0]]==b[x[1]]&&a[x[1]]==b[x[0]])return 1;return 2}const [s,l]=a.length<b.length?[a,b]:[b,a];let i=0;while(i<s.length&&s[i]==l[i])i++;return s.slice(i)==l.slice(i+1)?1:2};
+const ALLM=new Set(D.flatMap(d=>d.m.map(norm)));
+const okM=(d,raw)=>{const v=norm(raw);if(!v)return false;const M=d.m.map(norm);if(M.includes(v))return true;if(ALLM.has(v))return false;return M.some(m=>m.length>=4&&v.length>=4&&dist(v,m)<=1)};
+
+const T={};
+[['','あいうえお'],['k','かきくけこ'],['s','さしすせそ'],['t','たちつてと'],['n','なにぬねの'],['h','はひふへほ'],['m','まみむめも'],['r','らりるれろ'],['g','がぎぐげご'],['z','ざじずぜぞ'],['d','だぢづでど'],['b','ばびぶべぼ'],['p','ぱぴぷぺぽ']].forEach(([c,k])=>[...'aiueo'].forEach((v,j)=>T[c+v]=k[j]));
+Object.assign(T,{ya:'や',yu:'ゆ',yo:'よ',wa:'わ',wo:'を',shi:'し',chi:'ち',tsu:'つ',fu:'ふ',ji:'じ'});
+[['ky','き'],['gy','ぎ'],['sh','し'],['sy','し'],['ch','ち'],['ty','ち'],['ny','に'],['hy','ひ'],['my','み'],['ry','り'],['by','び'],['py','ぴ'],['j','じ'],['jy','じ']].forEach(([p,k])=>[['a','ゃ'],['u','ゅ'],['o','ょ']].forEach(([v,s])=>T[p+v]=k+s));
+const TK=Object.keys(T);
+/* Romaji während der Eingabe in Hiragana umwandeln; unfertige Silben bleiben stehen */
+function liveKana(s,final){
+ s=s.replace(/ā/g,'aa').replace(/ī/g,'ii').replace(/ū/g,'uu').replace(/ē/g,'ee').replace(/ō/g,'ou');
+ let o='',i=0;
+ while(i<s.length){
+  const c=s[i],n=s[i+1];
+  if(!/[a-z]/.test(c)){if(c!=="'")o+=c;i++;continue}
+  if(c==='n'){
+   if(n===undefined){o+=final?'ん':'n';i++;continue}
+   if(n==="'"||(n==='n'&&final&&s[i+2]===undefined)){o+='ん';i+=2;continue}
+   if(!'aiueoy'.includes(n)){o+='ん';i++;continue}
+  }
+  if(n&&c===n&&/[bcdfghjkmpqrstwz]/.test(c)){o+='っ';i++;continue}
+  const t=[3,2,1].map(l=>s.substr(i,l)).find(x=>T[x]);
+  if(t){o+=T[t];i+=t.length;continue}
+  const rest=s.slice(i);
+  if(!final&&TK.some(k=>k.startsWith(rest))){o+=rest;break}
+  o+=c;i++;
+ }
+ return o;
+}
+const toHira=s=>s.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-96));
+const normR=raw=>toHira(liveKana(raw.trim().toLowerCase(),true)).replace(/んん$/,"ん");
+
+/* ---------- Kana-Daten ---------- */
+const KC="あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ";
+const KRL="a i u e o ka ki ku ke ko sa shi su se so ta chi tsu te to na ni nu ne no ha hi fu he ho ma mi mu me mo ya yu yo ra ri ru re ro wa wo n ga gi gu ge go za ji zu ze zo da ji zu de do ba bi bu be bo pa pi pu pe po".split(" ");
+const KALT={し:"si",ち:"ti",つ:"tu",ふ:"hu",を:"o",じ:"zi",ぢ:"di",づ:"du"};
+const KI={};[...KC].forEach((c,i)=>KI[c]=i);
+const HR=["あいうえお","かきくけこ","さしすせそ","たちつてと","なにぬねの","はひふへほ","まみむめも","や・ゆ・よ","らりるれろ","わ・・・を","ん・・・・"];
+const HD=["がぎぐげご","ざじずぜぞ","だぢづでど","ばびぶべぼ","ぱぴぷぺぽ"];
+const kata=c=>String.fromCharCode(c.charCodeAt(0)+96);
+
+/* ---------- Speicher ---------- */
+const INT=[0,.08,.25,1,4,24,72,168,720]; // Stunden bis zur nächsten Wiederholung je Stufe
+const blank=()=>({k:{},ka:{},log:{},lv:1,upd:0,snd:true,sess:null});
+const parse=t=>{try{const o=JSON.parse(t);if(o&&typeof o=="object"&&typeof o.k=="object"){return{k:o.k||{},ka:o.ka||{},log:o.log||{},lv:+o.lv||1,upd:+o.upd||0,snd:o.snd!==false,sess:o.sess&&typeof o.sess=="object"?o.sess:null}}}catch(e){}return null};
+let ST=blank();
+try{const t=localStorage.getItem("kp2");const p=t&&parse(t);if(p)ST=p}catch(e){}
+const now=()=>Date.now();
+const fixDue=()=>Object.values(ST.k).forEach(s=>{s.due=Math.min(s.due,now()+INT[s.st]*36e5)});
+fixDue();
+const writeLocal=()=>{try{localStorage.setItem("kp2",JSON.stringify(ST))}catch(e){}};
+let neonT=0;
+function flashSaved(t,cloud){const n=document.getElementById("saved");if(!n)return;n.textContent=t;n.classList.toggle("cloud",!!cloud);n.classList.remove("on");void n.offsetWidth;n.classList.add("on");clearTimeout(neonT);neonT=setTimeout(()=>n.classList.remove("on"),1800)}
+function save(){ST.upd=now();writeLocal();push();flashSaved(ST.sess?"Session gespeichert":"Gespeichert")}
+
+/* Online-Speicherung über eigenen Server: jeder Stand liegt unter einem Sync-Code */
+const API="/api/p/";
+const ALPH="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const newCode=()=>{const a=new Uint8Array(10);crypto.getRandomValues(a);const s=[...a].map(x=>ALPH[x%ALPH.length]).join("");return s.slice(0,5)+"-"+s.slice(5)};
+const normCode=s=>{const t=String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");return t.length==10?t.slice(0,5)+"-"+t.slice(5):""};
+const readCookie=()=>{const m=document.cookie.match(/(?:^|; )kp_code=([^;]+)/);return m?decodeURIComponent(m[1]):""};
+function getCode(){let c="";try{c=localStorage.getItem("kp_code")||""}catch(e){}c=normCode(c)||normCode(readCookie());return c}
+function setCode(c){try{localStorage.setItem("kp_code",c)}catch(e){}try{document.cookie="kp_code="+encodeURIComponent(c)+";max-age=34560000;path=/;SameSite=Lax"}catch(e){}}
+let CODE=getCode();
+if(!CODE){CODE=newCode();setCode(CODE)}else setCode(CODE);
+let online=true,syncState="loading",timer=0,writing=false,again=false;
+function push(){clearTimeout(timer);timer=setTimeout(flush,700)}
+function flushNow(keep){clearTimeout(timer);flush(keep)}
+async function flush(keep){
+ if(writing){again=true;return}
+ writing=true;
+ try{
+  const r=await fetch(API+CODE,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:JSON.stringify(ST),upd:ST.upd}),keepalive:!!keep});
+  if(!r.ok)throw new Error(r.status);
+  syncState="cloud";flashSaved("Online gesichert",true);
+ }catch(e){syncState="error"}
+ writing=false;paintSync();
+ if(again){again=false;flush()}
+}
+async function pull(){
+ const r=await fetch(API+CODE,{cache:"no-store"});
+ if(r.status==404){if(ST.upd)flushNow();return}
+ if(!r.ok)throw new Error(r.status);
+ const j=await r.json(),ru=+j.upd||0;
+ if(ru>ST.upd){if(view=="home"){const p=parse(String(j.data||""));if(p){ST=p;fixDue();writeLocal();home()}}}
+ else if(ST.upd>ru)flushNow();
+}
+async function initSync(){
+ paintSync();
+ try{await pull();syncState="cloud"}catch(e){syncState="error"}
+ paintSync();
+}
+const SYNC={loading:"Verbindet mit dem Server …",cloud:"Online gespeichert, auf allen Geräten mit deinem Sync-Code",error:"Server gerade nicht erreichbar, auf diesem Gerät gesichert"};
+function paintSync(){const e=el("sync");if(!e)return;e.className="sync "+syncState;e.textContent=SYNC[syncState]}
+document.addEventListener("visibilitychange",()=>{if(document.hidden)flushNow(true);else if(view=="home")pull().then(()=>{syncState="cloud";paintSync()},()=>{})});
+addEventListener("online",()=>flushNow());
+addEventListener("pagehide",()=>flushNow(true));
+
+/* ---------- Hilfen ---------- */
+const $=document.getElementById("app"),el=id=>document.getElementById(id);
+let view="home";
+const dk=(d=new Date())=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+function logAns(){const k=dk();ST.log[k]=(ST.log[k]||0)+1;const ks=Object.keys(ST.log).sort();while(ks.length>120)delete ST.log[ks.shift()]}
+function streak(){let n=0;const d=new Date();if(!ST.log[dk(d)])d.setDate(d.getDate()-1);while(ST.log[dk(d)]){n++;d.setDate(d.getDate()-1)}return n}
+const wait=t=>{if(t<=now())return"jetzt";const m=Math.max(1,Math.round((t-now())/6e4));return m<90?"in "+m+" Min.":m<2880?"in "+Math.round(m/60)+" Std.":"in "+Math.round(m/1440)+" Tagen"};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+const sure=d=>ST.k[d.k]&&ST.k[d.k].st>=5;
+const stage=st=>st>=8?"Gemeistert":st>=5?"Sicher":"Lernphase";
+const due=()=>D.filter(d=>ST.k[d.k]&&ST.k[d.k].due<=now());
+const LV=Math.ceil(D.length/10),inL=l=>D.filter(d=>d.l==l);
+const ready=l=>{const a=inL(l);return a.filter(sure).length>=Math.ceil(a.length*.9)};
+const cur=()=>{let l=1;while(l<LV&&ready(l))l++;return l};
+const fresh=()=>D.filter(d=>!ST.k[d.k]&&d.l<=cur());
+const tileCls=s=>!s?"sx":s.st>=8?"s8":s.st>=5?"sg":"sl";
+function sheet(html){el("sheet").innerHTML=html;el("ov").hidden=false;const b=el("sheet").querySelector("[data-close]");if(b){b.onclick=closeSheet;b.focus()}}
+function closeSheet(){el("ov").hidden=true;el("sheet").innerHTML=""}
+el("ov").onclick=e=>{if(e.target.id=="ov")closeSheet()};
+addEventListener("keydown",e=>{if(e.key=="Escape"&&!el("ov").hidden)closeSheet()});
+
+
+/* ---------- Audio ---------- */
+let AC=null,jaVoice=null;
+const sndOn=()=>ST.snd!==false;
+function tone(seq){if(!sndOn())return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state=="suspended")AC.resume();let t=AC.currentTime;seq.forEach(([f,d,type])=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type||"sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02);t+=d*.8})}catch(e){}}
+const sfx={ok:()=>tone([[660,.1],[990,.18]]),bad:()=>tone([[220,.16,"triangle"],[175,.22,"triangle"]]),done:()=>tone([[523,.11],[659,.11],[784,.11],[1047,.3]])};
+const canSpeak=()=>"speechSynthesis" in window;
+const pickVoice=()=>{try{jaVoice=speechSynthesis.getVoices().find(v=>/^ja/i.test(v.lang))||null}catch(e){}};
+try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
+function say(text){if(!sndOn()||!canSpeak()||!text)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";if(jaVoice)u.voice=jaVoice;u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+const SPK='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-say]");if(b)say(b.dataset.say)});
+
+const readList=d=>["o","k"].map(g=>{const L=RD[d.k].filter(r=>r[0]==g);return L.length?`<h3>${GR[g][0]}</h3><ul class="rl">${L.map(r=>`<li><b>${r[1].split("/").join(" / ")}</b><span>${r[2]}</span>${canSpeak()?`<button class="spk" data-say="${r[1].split("/")[0]}" aria-label="Anhören">${SPK}</button>`:"<i></i>"}</li>`).join("")}</ul>`:""}).join("");
+const fieldsHtml=d=>["o","k"].map(g=>{const L=RD[d.k].map((r,i)=>[r,i]).filter(([r])=>r[0]==g);return L.length?`<div class="grp"><h3>${GR[g][0]}</h3><p class="tiny">${GR[g][1]}</p>${L.map(([r,i])=>`<div class="fld"><label for="r${i}"><b>Verwendung:</b> ${r[2]}</label><input id="r${i}" class="rin" data-i="${i}" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" lang="ja" placeholder="Romaji oder Hiragana"><div class="res" id="x${i}"></div></div>`).join("")}</div>`:""}).join("");
+
+/* ---------- Übersicht ---------- */
+function home(){
+ view="home";scrollTo(0,0);
+ const c=cur();let up=false;
+ if(c>(ST.lv||1)){ST.lv=c;up=true;save()}
+ const f=fresh().length,u=due().length,A=inL(c),g=A.filter(sure).length;
+ const keys=Object.keys(ST.k),learned=keys.length,sureAll=D.filter(sure).length;
+ const nx=learned?Math.min(...keys.map(k=>ST.k[k].due)):0;
+ const soon=keys.filter(k=>ST.k[k].due>now()&&ST.k[k].due<=now()+864e5).length;
+ const sk=streak();
+ $.innerHTML=`
+ <header class="top"><h1>Kanji-Pfad</h1><div class="row" style="gap:8px"><button class="ghost sm" id="snd" aria-pressed="${sndOn()}">${sndOn()?"Ton an":"Ton aus"}</button><button class="ghost sm" id="set">Sicherung</button></div></header>
+ <p class="sync" id="sync"></p>
+ ${up?`<div class="banner">Level ${c} ist freigeschaltet. Neue Kanji warten in den Lektionen.</div>`:""}
+ <div class="stats"><div><b>${learned}</b><span>von ${D.length} gelernt</span></div><div><b>${sureAll}</b><span>sicher</span></div><div><b>${sk}</b><span>${sk==1?"Tag":"Tage"} in Folge</span></div></div>
+ <p class="sub">Level ${c} von ${LV}: ${g} von ${A.length} Kanji sicher</p>
+ <div class="bar"><i style="width:${g/A.length*100}%"></i></div>
+ ${ST.sess?`<div class="resume" role="region" aria-label="Angefangene Session"><div><b>Weitermachen</b><span>${ST.sess.kind=="lesson"?"Lektion "+((ST.sess.n||0)+1)+" von "+ST.sess.keys.length:"Abfrage: noch "+(ST.sess.Q||[]).length+" Fragen"}</span></div><button class="rsb" id="rsm">Weiter</button><button class="ghost" id="rsd">Verwerfen</button></div>`:""}
+ <div class="row"><button class="big" id="bl" ${f?"":"disabled"}><b>${f}</b>Lektionen</button>
+ <button class="big alt" id="br" ${u?"":"disabled"}><b>${u}</b>Wiederholungen</button></div>
+ ${learned&&!u?`<p class="sub">Nächste Wiederholung ${wait(nx)}. In den nächsten 24 Stunden: ${soon}.</p>`:""}
+ ${!learned?`<p class="sub">Starte mit der ersten Lektion. Danach fragt dich der Kanji-Pfad die Zeichen in wachsenden Abständen ab.</p>`:""}
+ ${learned?`<div class="row"><button class="ghost" id="bf">Frei üben (ohne Wertung)</button></div>`:""}
+ <div class="row"><button class="ghost" id="kh">Hiragana</button><button class="ghost" id="kk">Katakana</button></div>
+ ${Array.from({length:c},(_,x)=>c-x).map(l=>{const a=inL(l);return `<div class="lv"><h2>Level ${l}</h2><span class="tiny">${a.filter(sure).length} von ${a.length} sicher</span></div>
+ <div class="grid">${a.map(d=>{const s=ST.k[d.k];return `<button class="t ${tileCls(s)}" data-k="${d.k}" ${s?"":"disabled"} aria-label="${s?d.k+", "+d.m[0]:"noch nicht gelernt"}"><span>${d.k}</span><small>${s?d.m[0]:"?"}</small></button>`}).join("")}</div>`}).join("")}
+ <div class="legend"><span><i style="background:var(--line)"></i>Neu</span><span><i style="background:var(--tk)"></i>Lernphase</span><span><i style="background:var(--tg)"></i>Sicher</span><span><i style="background:var(--tm)"></i>Gemeistert</span></div>
+ ${c<LV?`<p class="tiny">Level ${c+1} wird freigeschaltet, sobald ${Math.ceil(A.length*.9)} Kanji aus Level ${c} sicher sind. Sicher heißt: mindestens Stufe 5, also einen Tag Abstand bis zur nächsten Abfrage.</p>`:""}`;
+ paintSync();
+ el("set").onclick=settings;
+ el("snd").onclick=()=>{ST.snd=!sndOn();save();home();if(sndOn())sfx.ok()};
+ el("bl").onclick=()=>lesson();
+ if(el("rsm")){el("rsm").onclick=()=>ST.sess.kind=="lesson"?lesson(ST.sess):review(ST.sess.o||{},ST.sess);el("rsd").onclick=()=>{ST.sess=null;save();home()}}
+ el("br").onclick=()=>review({});
+ if(el("bf"))el("bf").onclick=()=>review({free:true});
+ el("kh").onclick=()=>kana(0);el("kk").onclick=()=>kana(1);
+ $.querySelectorAll(".t[data-k]").forEach(b=>b.onclick=()=>detail(b.dataset.k));
+}
+
+function detail(k){
+ const d=DK[k],s=ST.k[k];if(!s)return;
+ sheet(`<div class="card"><div class="kanji">${d.k}</div><h2>${d.m.map(cap).join(", ")}</h2>
+ <dl class="dl"><dt>Stufe</dt><dd>${s.st} von 8 · ${stage(s.st)}</dd><dt>Abfrage</dt><dd>${wait(s.due)}</dd></dl>
+ <div class="rd">${readList(d)}</div><p class="hint">${d.h}</p><button class="ghost" data-close>Schließen</button></div>`);
+}
+
+/* ---------- Lektionen ---------- */
+function lesson(R){
+ view="lesson";
+ const L=R?R.keys.filter(k=>DK[k]).map(k=>DK[k]):fresh().slice(0,5);let n=R?Math.min(R.n||0,L.length-1):0;
+ if(!L.length){ST.sess=null;save();return home()}
+ const show=()=>{const d=L[n];scrollTo(0,0);ST.sess={kind:"lesson",keys:L.map(x=>x.k),n};save();
+  $.innerHTML=`<div class="qhead"><button class="ghost sm" id="x">Beenden</button><span class="sub">Lektion ${n+1} von ${L.length}</span></div>
+  <div class="bar thin"><i style="width:${(n+1)/L.length*100}%"></i></div>
+  <div class="card"><div class="kanji">${d.k}</div><h2>${cap(d.m[0])}</h2>
+  ${d.m.length>1?`<p class="sub">Auch: ${d.m.slice(1).join(", ")}</p>`:""}
+  <div class="rd">${readList(d)}</div>
+  <p class="hint">${d.h}</p></div>
+  <div class="row"><button class="ghost" id="b" ${n?"":"disabled"}>Zurück</button><button class="big1" id="nx">${n<L.length-1?"Weiter":"Abfragen"}</button></div>`;
+  el("x").onclick=home;
+  say(d.r);
+  el("b").onclick=()=>{n--;show()};
+  el("nx").onclick=()=>{if(n<L.length-1){n++;show()}else{L.forEach(d=>ST.k[d.k]={st:1,due:now()+INT[1]*36e5});ST.sess=null;save();review({items:L,free:true,after:L.length})}};
+  el("nx").focus();
+ };show();
+}
+
+/* ---------- Abfrage ---------- */
+const LOOK=["人入八","日目田白百","木本林森","大犬天夫","左右石","見貝目","千十午","玉王土","母毎女","四西口","小少","子字学","前後","今分会"].map(g=>[...g]);
+function optionsFor(d){
+ const bad=new Set(d.m),good=x=>x&&x.k!=d.k&&!x.m.some(m=>bad.has(m));
+ const near=[];
+ LOOK.forEach(g=>{if(g.includes(d.k))g.forEach(k=>{const x=DK[k];if(good(x))near.push(x)})});
+ const rest=shuffle(D.filter(x=>good(x)&&!near.includes(x)&&(ST.k[x.k]||x.l<=d.l)));
+ return shuffle([d,...shuffle(near).concat(rest).slice(0,3)]);
+}
+function review(o,R){
+ view="review";
+ let Q,W,C,total,done;
+ if(R){Q=(R.Q||[]).filter(q=>DK[q[0]]).map(q=>[DK[q[0]],q[1]]);W=R.W||{};C=R.C||{};total=R.total||Q.length;done=R.done||0}
+ else{const items=o.items||(o.free?D.filter(d=>ST.k[d.k]):due());Q=[];items.forEach(d=>Q.push([d,"m"],[d,"r"],[d,"w"]));shuffle(Q);W={};C={};total=Q.length;done=0}
+ const keep=()=>{ST.sess=Q.length?{kind:"review",o:{free:!!o.free,after:o.after||0},Q:Q.map(q=>[q[0].k,q[1]]),W,C,total,done}:null};
+ const TAG={m:"Bedeutung",r:"Lesungen",w:"Welches Kanji?"};
+ const ask=()=>{
+  if(!Q.length){ST.sess=null;save();return o.after?finished(o.after):home()}
+  const [d,t]=Q[0];let checked=false,ok=false;scrollTo(0,0);
+  const head=t=="w"?`<p class="mean">${d.m.slice(0,2).map(cap).join(" / ")}</p>`:`<div class="kanji">${d.k}</div>`;
+  const body=t=="m"
+   ?`<input id="a" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" lang="de" placeholder="auf Deutsch" aria-label="Bedeutung auf Deutsch">`
+   :t=="r"
+   ?`<p class="tiny">Schreibe jede Form in das passende Feld. Romaji wird beim Tippen zu Hiragana.</p>${fieldsHtml(d)}`
+   :`<div class="opts">${optionsFor(d).map(x=>`<button class="opt" data-k="${x.k}" aria-label="${x.k}">${x.k}</button>`).join("")}</div>`;
+  $.innerHTML=`<div class="qhead"><button class="ghost sm" id="x">Beenden</button><span class="sub">${done} von ${total}${o.free?" · ohne Wertung":""}</span></div>
+  <div class="bar thin"><i style="width:${done/total*100}%"></i></div>
+  <div class="card" id="c">${head}<span class="tag ${t=="r"?"r":""}">${TAG[t]}</span>${body}<div id="f" role="status"></div></div>
+  <div class="row"><button class="ghost" id="skip">Weiß ich nicht</button><button class="ghost" id="fix" hidden>Ich lag richtig</button><button class="big1" id="go">Prüfen</button></div>`;
+  const c=el("c"),f=el("f"),go=el("go"),fix=el("fix"),skip=el("skip"),ins=[...c.querySelectorAll("input")],opts=[...c.querySelectorAll(".opt")];
+  if(ins[0])ins[0].focus();
+  const shake=()=>{c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake");(ins.find(x=>!x.value.trim())||ins[0]).focus()};
+  const finish=sayText=>{
+   ins.forEach(x=>x.readOnly=true);
+   c.classList.add(ok?"ok":"bad");checked=true;logAns();ok?sfx.ok():sfx.bad();say(sayText);
+   go.disabled=false;go.textContent="Weiter";fix.hidden=ok;skip.hidden=true;go.focus();
+  };
+  const check=force=>{
+   if(!force&&ins.every(x=>!x.value.trim()))return shake();
+   if(t=="m"){
+    ok=okM(d,ins[0].value);
+    f.textContent=ok?"Richtig!":"Richtig wäre: "+d.m.join(" / ");
+    finish(d.r);
+   }else{
+    ok=true;
+    ins.forEach(x=>{
+     const i=+x.dataset.i,forms=RD[d.k][i][1].split("/"),v=normR(x.value),good=forms.includes(v),r=el("x"+i);
+     if(!good)ok=false;
+     if(v)x.value=v;
+     x.classList.add(good?"ok":"bad");
+     r.className="res "+(good?"ok":"bad");
+     r.textContent=good?"Richtig":"Richtig wäre: "+forms.join(" / ");
+    });
+    f.textContent=ok?"Richtig!":"Nicht alle Felder stimmen.";
+    finish(RD[d.k].map(r=>r[1].split("/")[0]).join("、"));
+   }
+  };
+  const next=()=>{
+   Q.shift();
+   if(ok){done++;C[d.k]=(C[d.k]||0)+1;
+    if(C[d.k]==3&&!o.free){const s=ST.k[d.k];s.st=W[d.k]?Math.max(1,s.st-1):Math.min(8,s.st+1);s.due=now()+INT[s.st]*36e5}
+   }else{W[d.k]=1;Q.splice(Math.min(Q.length,3+Math.floor(Math.random()*3)),0,[d,t])}
+   keep();save();ask();
+  };
+  if(t=="w"){
+   go.disabled=true;skip.hidden=true;
+   opts.forEach(b=>b.onclick=()=>{
+    if(checked)return;
+    ok=b.dataset.k==d.k;
+    opts.forEach(x=>{x.disabled=true;if(x.dataset.k==d.k)x.classList.add("ok");else if(x===b)x.classList.add("bad")});
+    f.textContent=ok?"Richtig!":"Richtig wäre: "+d.k+" ("+d.r+")";
+    finish(d.r);
+   });
+  }
+  ins.forEach((x,n)=>{
+   if(t=="r"){const conv=()=>{const v=liveKana(x.value.toLowerCase(),false);if(v!==x.value)x.value=v};x.addEventListener("input",e=>{if(e.isComposing||(e.inputType&&!e.inputType.startsWith("insert")))return;conv()});x.addEventListener("compositionend",conv)}
+   x.onkeydown=e=>{if(e.key!="Enter")return;e.preventDefault();if(checked)next();else if(n<ins.length-1)ins[n+1].focus();else check()};
+  });
+  go.onclick=()=>checked?next():check();
+  skip.onclick=()=>check(true);
+  fix.onclick=()=>{ok=true;c.classList.replace("bad","ok");f.textContent="Als richtig gewertet";next()};
+  el("x").onclick=()=>{save();home()};
+ };ask();
+}
+function finished(n){
+ view="done";sfx.done();scrollTo(0,0);
+ $.innerHTML=`<div class="card"><h2>Lektion geschafft</h2><p class="sub">${n} neue Kanji sind jetzt auf deinem Pfad. In etwa 5 Minuten kommen sie zur ersten richtigen Wiederholung.</p><button class="big1" id="h">Zur Übersicht</button></div>`;
+ el("h").onclick=home;el("h").focus();
+}
+
+/* ---------- Kana ---------- */
+function kana(t){
+ view="kana";scrollTo(0,0);
+ const sc=c=>t?kata(c):c,key=c=>(t?"k:":"h:")+c,lvl=c=>ST.ka[key(c)]||0;
+ const cell=c=>c=="・"?`<div class="t blank"></div>`:`<button class="t ${lvl(c)>=3?"sg":lvl(c)>=1?"sl":"sx"}" data-say="${c}" aria-label="${KRL[KI[c]]} anhören"><span>${sc(c)}</span><small>${KRL[KI[c]]}</small></button>`;
+ const base=[...KC.slice(0,46)],all=[...KC];
+ const n=a=>a.filter(c=>lvl(c)>=3).length;
+ $.innerHTML=`<div class="qhead"><button class="ghost sm" id="bk">Zurück</button><span class="tiny">${n(all)} von ${all.length} sicher</span></div>
+ <h1>${t?"Katakana":"Hiragana"}</h1>
+ <p class="sub">Tabelle mit Aussprache in Romaji. Grün bedeutet: dreimal hintereinander richtig.</p>
+ <div class="row"><button class="big1" id="p1">Grundzeichen üben</button><button class="ghost" id="p2">Mit Dakuten</button></div>
+ <h2>Grundzeichen</h2><div class="grid k5">${HR.join("").split("").map(cell).join("")}</div>
+ <h2>Dakuten und Handakuten</h2><div class="grid k5">${HD.join("").split("").map(cell).join("")}</div>`;
+ el("bk").onclick=home;
+ const practice=set=>{
+  view="kanaq";
+  const Q=set.map(c=>[c,(ST.ka[key(c)]||0)+Math.random()*1.5]).sort((x,y)=>x[1]-y[1]).slice(0,10).map(x=>x[0]);
+  let done=0;
+  const ask=()=>{
+   if(!Q.length){save();return kana(t)}
+   const c=Q[0];let chk=false,good=false;scrollTo(0,0);
+   $.innerHTML=`<div class="qhead"><button class="ghost sm" id="x">Beenden</button><span class="sub">${done} von 10 richtig</span></div>
+   <div class="bar thin"><i style="width:${done*10}%"></i></div>
+   <div class="card" id="c"><div class="kanji">${sc(c)}</div><input id="a" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Romaji" aria-label="Aussprache in Romaji"><div id="f" role="status"></div></div>
+   <div class="row"><button class="big1" id="go">Prüfen</button></div>`;
+   const a=el("a"),cd=el("c"),f=el("f"),go=el("go");a.focus();
+   const check=()=>{
+    const v=a.value.trim().toLowerCase();
+    if(!v){cd.classList.remove("shake");void cd.offsetWidth;cd.classList.add("shake");a.focus();return}
+    good=v==KRL[KI[c]]||v==KALT[c];
+    cd.classList.add(good?"ok":"bad");a.readOnly=true;chk=true;logAns();good?sfx.ok():sfx.bad();say(c);
+    f.textContent=good?"Richtig!":"Richtig wäre: "+KRL[KI[c]];go.textContent="Weiter";
+   };
+   const next=()=>{Q.shift();ST.ka[key(c)]=good?Math.min(5,lvl(c)+1):0;if(good)done++;else Q.push(c);save();ask()};
+   go.onclick=()=>chk?next():check();
+   a.onkeydown=e=>{if(e.key=="Enter"){e.preventDefault();chk?next():check()}};
+   el("x").onclick=()=>{save();kana(t)};
+  };ask();
+ };
+ el("p1").onclick=()=>practice(base);
+ el("p2").onclick=()=>practice(all);
+}
+
+/* ---------- Sicherung ---------- */
+const enc=s=>btoa(unescape(encodeURIComponent(s)));
+const dec=s=>{s=s.trim();if(s.startsWith("{"))return s;try{return decodeURIComponent(escape(atob(s.replace(/\s+/g,""))))}catch(e){return""}};
+function settings(){
+ view="set";scrollTo(0,0);
+ $.innerHTML=`<div class="qhead"><button class="ghost sm" id="x">Zurück</button></div>
+ <h1>Sicherung</h1>
+ <section class="panel"><h2>Speicherort</h2><p class="sync" id="sync"></p>
+ <p class="sub">Jeder Schritt wird online auf dem Kanji-Pfad-Server gespeichert, auch in der App auf dem Home-Bildschirm. Zusätzlich liegt immer eine Kopie auf diesem Gerät.</p></section>
+ <section class="panel"><h2>Dein Sync-Code</h2><p class="code" id="cd">${CODE}</p>
+ <p class="sub">Mit diesem Code holst du deinen Stand auf ein anderes Gerät. Schreib ihn dir auf: Ohne ihn kommst du nach dem Löschen der App nicht mehr an deinen Fortschritt.</p>
+ <button class="big1" id="cc">Code kopieren</button><p class="tiny" id="ccm" role="status"></p>
+ <h2>Anderes Gerät verbinden</h2><p class="sub">Gib hier den Sync-Code von deinem anderen Gerät ein. Dein Stand auf diesem Gerät wird dann durch den Stand vom Code ersetzt.</p>
+ <input id="nc" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="XXXXX-XXXXX" aria-label="Sync-Code eingeben"><button class="ghost w" id="ncb">Verbinden</button><p class="tiny" id="ncm" role="status"></p></section>
+ <section class="panel"><h2>Sicherungscode</h2><p class="sub">Kopiere den Code und bewahre ihn z. B. in einer Notiz auf. Damit kannst du deinen Fortschritt jederzeit wiederherstellen.</p>
+ <textarea id="exp" readonly rows="4" aria-label="Sicherungscode"></textarea><button class="big1" id="cp">Code kopieren</button><p class="tiny" id="cpm" role="status"></p></section>
+ <section class="panel"><h2>Sicherung einspielen</h2><textarea id="imp" rows="4" placeholder="Sicherungscode hier einfügen" aria-label="Sicherungscode einfügen"></textarea>
+ <button class="ghost w" id="im">Einspielen</button><div id="imc" class="row" hidden></div><p class="tiny" id="imm" role="status"></p></section>
+ <section class="panel"><h2>Neu anfangen</h2><p class="sub">Löscht deinen gesamten Kanji- und Kana-Fortschritt, auch im Konto.</p>
+ <button class="ghost danger w" id="rs">Fortschritt zurücksetzen</button><div id="rsc" class="row" hidden></div></section>`;
+ paintSync();
+ const exp=el("exp");exp.value=enc(JSON.stringify(ST));
+ el("x").onclick=home;
+ el("cc").onclick=()=>{const m=el("ccm");try{navigator.clipboard.writeText(CODE).then(()=>m.textContent="Kopiert.",()=>m.textContent="Markiere den Code und kopiere ihn von Hand.")}catch(e){m.textContent="Markiere den Code und kopiere ihn von Hand."}};
+ el("ncb").onclick=async()=>{const m=el("ncm"),c=normCode(el("nc").value);
+  if(!c){m.textContent="Der Code hat 10 Zeichen, z. B. ABCDE-FGH23.";return}
+  m.textContent="Wird geladen …";
+  try{const r=await fetch(API+c,{cache:"no-store"});
+   if(r.status==404){m.textContent="Zu diesem Code gibt es keinen gespeicherten Stand. Prüfe die Schreibweise.";return}
+   if(!r.ok)throw 0;const j=await r.json(),p=parse(String(j.data||""));if(!p)throw 0;
+   CODE=c;setCode(c);ST=p;fixDue();writeLocal();syncState="cloud";home();
+  }catch(e){m.textContent="Server nicht erreichbar. Versuch es gleich noch einmal."}};
+ el("cp").onclick=()=>{const m=el("cpm");try{navigator.clipboard.writeText(exp.value).then(()=>m.textContent="Kopiert.",()=>{exp.select();m.textContent="Der Code ist markiert. Kopiere ihn jetzt von Hand."})}catch(e){exp.select();m.textContent="Der Code ist markiert. Kopiere ihn jetzt von Hand."}};
+ el("im").onclick=()=>{
+  const p=parse(dec(el("imp").value)),m=el("imm"),box=el("imc");
+  if(!p){m.textContent="Der Code ist ungültig. Kopiere ihn vollständig und füge ihn noch einmal ein.";box.hidden=true;return}
+  m.textContent=`Gefunden: ${Object.keys(p.k).length} gelernte Kanji. Dein aktueller Stand wird ersetzt.`;
+  box.innerHTML=`<button class="ghost" id="imn">Abbrechen</button><button class="big1" id="imy">Ja, ersetzen</button>`;box.hidden=false;
+  el("imn").onclick=()=>{box.hidden=true;m.textContent=""};
+  el("imy").onclick=()=>{ST=p;fixDue();save();home()};
+ };
+ el("rs").onclick=()=>{
+  const box=el("rsc");
+  box.innerHTML=`<button class="ghost" id="rsn">Abbrechen</button><button class="big1" id="rsy" style="background:var(--bad);color:var(--card)">Endgültig löschen</button>`;box.hidden=false;
+  el("rsn").onclick=()=>box.hidden=true;
+  el("rsy").onclick=()=>{ST=blank();save();home()};
+ };
+}
+
+home();
+initSync();
+</script>
+
+</body></html>
