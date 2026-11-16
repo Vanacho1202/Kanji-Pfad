@@ -521,7 +521,7 @@ const sfx={ok:()=>tone([[660,.1],[990,.18]]),bad:()=>tone([[220,.16,"triangle"],
 const canSpeak=()=>"speechSynthesis" in window;
 const pickVoice=()=>{try{jaVoice=speechSynthesis.getVoices().find(v=>/^ja/i.test(v.lang))||null}catch(e){}};
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
-function say(text){if(!sndOn()||!canSpeak()||!text)return;try{speechSynthesis.cancel();[["Mmmh,",.5,1.1],["leeecker",.45,1.5],["Bieeerchen!",.55,2],["Aaah!",.6,1.3]].forEach(([w,r,pi])=>{const u=new SpeechSynthesisUtterance(w);u.lang="de-DE";u.rate=r;u.pitch=pi;speechSynthesis.speak(u)})}catch(e){}}
+function say(text){if(!sndOn()||!canSpeak()||!text)return;try{speechSynthesis.cancel();if(Math.random()<.1){const u=new SpeechSynthesisUtterance("Du GoofLord!");u.lang="de-DE";u.rate=1;u.pitch=1.2;speechSynthesis.speak(u)}else{const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";if(jaVoice)u.voice=jaVoice;u.rate=.85;speechSynthesis.speak(u)}}catch(e){}}
 const SPK='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-say]");if(b)say(b.dataset.say)});
 
