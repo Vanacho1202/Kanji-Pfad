@@ -516,7 +516,7 @@ addEventListener("keydown",e=>{if(e.key=="Escape"&&!el("ov").hidden)closeSheet()
 /* ---------- Audio ---------- */
 /* Beleidigungen beim Vorlesen: Liste und Chance hier ändern */
 const INSULT_CHANCE=0.4; // 0.4 = 40 %
-const INSULTS=["Arschloch!","Du GoofLord!","Du Lappen!","Du Pfeife!","Du Knalltüte!","Du Hohlbirne!","Du Vollpfosten!","Du Lauch!","Du Kartoffel!"];
+const INSULTS=["Nigger"];
 let AC=null,jaVoice=null;
 const sndOn=()=>ST.snd!==false;
 function tone(seq){if(!sndOn())return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state=="suspended")AC.resume();let t=AC.currentTime;seq.forEach(([f,d,type])=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type||"sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02);t+=d*.8})}catch(e){}}
